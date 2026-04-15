@@ -523,6 +523,10 @@ main {
   line-height: 1.5;
 }
 
+.contact-item__text--address {
+  white-space: pre-line;
+}
+
 .contact-item__text a {
   color: var(--color-primary);
 }
