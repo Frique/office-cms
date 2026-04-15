@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Office Directory — Office CMS</title>
+  <meta name="description" content="Browse our office locations around the world.">
+
+  <!-- SEO -->
+  <meta property="og:title" content="Office Directory">
+  <meta property="og:description" content="Browse our office locations.">
+  <meta property="og:type" content="website">
+
+  <!-- Schema.org structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Office Directory",
+    "description": "Browse all office locations"
+  }
+  </script>
+
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a href="/" class="site-header__logo">Office <span>Directory</span></a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="/" class="site-nav__link">Offices</a>
+        <a href="/admin" class="site-nav__link">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" aria-label="Hero">
+    <div class="hero__content">
+      <h1 class="hero__title">Our Offices</h1>
+      <p class="hero__subtitle">Explore our network of premium office locations</p>
+    </div>
+  </section>
+
+  <!-- Offices Section -->
+  <section class="offices-section">
+    <div class="container">
+      <div class="offices-section__header">
+        <h2 class="offices-section__title">All Locations</h2>
+        <p class="offices-section__subtitle" id="offices-count"></p>
+      </div>
+
+      <!-- Loading state -->
+      <div id="loading-state" class="loading">
+        <div class="spinner"></div>
+        <span>Loading offices…</span>
+      </div>
+
+      <!-- Error state -->
+      <div id="error-state" class="empty-state hidden" role="alert">
+        <p>Failed to load offices. Please try again.</p>
+      </div>
+
+      <!-- Empty state -->
+      <div id="empty-state" class="empty-state hidden">
+        <div class="empty-state__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </div>
+        <h3 class="empty-state__title">No offices yet</h3>
+        <p>Check back later for office listings.</p>
+      </div>
+
+      <!-- Office grid -->
+      <div id="office-grid" class="office-grid hidden" aria-label="Office listings"></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; <span id="year"></span> Office CMS. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+  <script src="/js/main.js"></script>
+</body>
+</html>
