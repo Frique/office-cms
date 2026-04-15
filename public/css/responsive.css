@@ -1,0 +1,50 @@
+/* =============================================
+   Office CMS - Responsive Breakpoints
+   ============================================= */
+
+/* Print styles */
+@media print {
+  .site-header,
+  .site-footer,
+  .carousel__prev,
+  .carousel__next,
+  .btn {
+    display: none;
+  }
+
+  body {
+    font-size: 12pt;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  :root {
+    --color-border: #000;
+    --color-text-muted: #000;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .carousel__slide {
+    transition: none;
+  }
+}
+
+/* Dark mode (basic) */
+@media (prefers-color-scheme: dark) {
+  /* Override only if no explicit theme is set */
+}

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Office — Office CMS</title>
+  <meta name="description" id="page-description" content="Office details">
+
+  <!-- OG tags (populated dynamically) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" id="og-title" content="Office Details">
+
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a href="/" class="site-header__logo">Office <span>Directory</span></a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="/" class="site-nav__link">← All Offices</a>
+        <a href="/admin" class="site-nav__link">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Loading -->
+    <div id="loading-state" class="loading" style="padding: 4rem 1rem;">
+      <div class="spinner"></div>
+      <span>Loading office details…</span>
+    </div>
+
+    <!-- Error -->
+    <div id="error-state" class="empty-state hidden">
+      <h3 class="empty-state__title">Office not found</h3>
+      <p>This office may have been removed or the link is incorrect.</p>
+      <br>
+      <a href="/" class="btn btn--primary">Back to Directory</a>
+    </div>
+
+    <!-- Office Content -->
+    <div id="office-content" class="hidden">
+      <div class="office-detail container">
+
+        <a href="/" class="office-detail__back">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+          Back to Directory
+        </a>
+
+        <div class="office-detail__header">
+          <h1 class="office-detail__name" id="office-name"></h1>
+          <div class="office-detail__location" id="office-location-wrapper" style="display:none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span id="office-location"></span>
+          </div>
+        </div>
+
+        <!-- Photo Carousel -->
+        <div id="carousel-wrapper" class="carousel" data-carousel>
+          <div class="carousel__track">
+            <!-- Slides injected here -->
+          </div>
+          <button class="carousel__prev" aria-label="Previous photo" style="display:none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+          <button class="carousel__next" aria-label="Next photo" style="display:none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </button>
+          <div class="carousel__counter" style="display:none"></div>
+        </div>
+        <div class="carousel__dots"></div>
+
+        <div class="office-detail__body">
+
+          <!-- Description -->
+          <div>
+            <p class="office-detail__description" id="office-description"></p>
+          </div>
+
+          <!-- Contact -->
+          <div>
+            <div class="contact-card" id="contact-card" style="display:none">
+              <h2 class="contact-card__title">Contact Information</h2>
+              <div id="contact-items"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--color-border);">
+          <a href="/" class="btn btn--secondary">← All Offices</a>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; <span id="year"></span> Office CMS. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    async function loadOffice() {
+      const match = window.location.pathname.match(/\/office\/([^/]+)/);
+      if (!match) { showError(); return; }
+
+      try {
+        const res = await fetch(`/api/offices/${match[1]}`, { credentials: 'same-origin' });
+        if (!res.ok) { showError(); return; }
+
+        const data = await res.json();
+        const office = data.office;
+        if (!office) { showError(); return; }
+
+        renderOffice(office);
+      } catch (err) {
+        showError();
+      }
+    }
+
+    function renderOffice(office) {
+      // Meta — textContent auto-escapes, setAttribute uses escaped values for attributes
+      document.getElementById('page-title').textContent = `${office.name} — Office CMS`;
+      document.getElementById('og-title').setAttribute('content', escapeHtml(office.name));
+      if (office.description) {
+        document.getElementById('page-description').setAttribute('content', escapeHtml(office.description.slice(0, 160)));
+      }
+
+      // Content — textContent is XSS-safe (auto-escapes)
+      document.getElementById('office-name').textContent = office.name;
+
+      if (office.location) {
+        document.getElementById('office-location').textContent = office.location;
+        document.getElementById('office-location-wrapper').style.display = 'flex';
+      }
+
+      if (office.description) {
+        document.getElementById('office-description').textContent = office.description;
+      }
+
+      // Photos carousel
+      const carousel = document.getElementById('carousel-wrapper');
+      const track = carousel.querySelector('.carousel__track');
+      const dotsContainer = document.querySelector('.carousel__dots');
+
+      if (office.photos && office.photos.length > 0) {
+        track.innerHTML = office.photos.map((url, i) => `
+          <div class="carousel__slide ${i === 0 ? 'carousel__slide--active' : ''}">
+            <img class="carousel__image" src="${escapeHtml(url)}" alt="${escapeHtml(office.name)} photo ${i + 1}" loading="${i === 0 ? 'eager' : 'lazy'}">
+          </div>
+        `).join('');
+
+        if (office.photos.length > 1) {
+          carousel.querySelector('.carousel__prev').style.display = 'flex';
+          carousel.querySelector('.carousel__next').style.display = 'flex';
+          carousel.querySelector('.carousel__counter').style.display = 'block';
+          carousel.querySelector('.carousel__counter').textContent = `1 / ${office.photos.length}`;
+        }
+      } else {
+        track.innerHTML = `
+          <div class="carousel__slide carousel__slide--active">
+            <div class="carousel__placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <span>No photos available</span>
+            </div>
+          </div>
+        `;
+      }
+
+      // Contact
+      const contactItems = [];
+      if (office.contact_email) {
+        contactItems.push(`
+          <div class="contact-item">
+            <svg class="contact-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            <div class="contact-item__text">
+              <a href="mailto:${escapeHtml(office.contact_email)}">${escapeHtml(office.contact_email)}</a>
+            </div>
+          </div>
+        `);
+      }
+      if (office.contact_phone) {
+        contactItems.push(`
+          <div class="contact-item">
+            <svg class="contact-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.55 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.12 6.12l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            <div class="contact-item__text">
+              <a href="tel:${escapeHtml(office.contact_phone)}">${escapeHtml(office.contact_phone)}</a>
+            </div>
+          </div>
+        `);
+      }
+      if (office.contact_address) {
+        contactItems.push(`
+          <div class="contact-item">
+            <svg class="contact-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <div class="contact-item__text contact-item__text--address">${escapeHtml(office.contact_address)}</div>
+          </div>
+        `);
+      }
+
+      if (contactItems.length > 0) {
+        document.getElementById('contact-items').innerHTML = contactItems.join('');
+        document.getElementById('contact-card').style.display = 'block';
+      }
+
+      document.getElementById('loading-state').classList.add('hidden');
+      document.getElementById('office-content').classList.remove('hidden');
+
+      // Add schema.org structured data
+      const schema = {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": office.name,
+        "description": office.description || undefined,
+        "address": office.contact_address ? {
+          "@type": "PostalAddress",
+          "streetAddress": office.contact_address
+        } : undefined,
+        "telephone": office.contact_phone || undefined,
+        "email": office.contact_email || undefined,
+      };
+      const schemaEl = document.createElement('script');
+      schemaEl.type = 'application/ld+json';
+      schemaEl.textContent = JSON.stringify(schema);
+      document.head.appendChild(schemaEl);
+    }
+
+    function showError() {
+      document.getElementById('loading-state').classList.add('hidden');
+      document.getElementById('error-state').classList.remove('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', loadOffice);
+  </script>
+  <script src="/js/carousel.js"></script>
+</body>
+</html>

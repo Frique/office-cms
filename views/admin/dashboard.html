@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Office CMS</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+</head>
+<body class="admin-layout">
+
+  <!-- Admin Header -->
+  <header class="admin-header">
+    <div class="admin-header__logo">
+      Office CMS <span>Admin</span>
+    </div>
+    <div class="admin-header__actions">
+      <a href="/" target="_blank" class="admin-header__user" style="color:rgba(255,255,255,0.7);font-size:0.8rem;">View Site ↗</a>
+      <button id="logout-btn" class="admin-header__logout">Sign Out</button>
+    </div>
+  </header>
+
+  <main class="admin-main">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-header__title">Offices</h1>
+        <p class="page-header__subtitle">Manage your office directory</p>
+      </div>
+      <a href="/admin/office/new" class="btn btn--primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        New Office
+      </a>
+    </div>
+
+    <!-- Alert -->
+    <div id="alert-message" class="alert hidden" role="alert"></div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card__value" id="total-count">—</div>
+        <div class="stat-card__label">Total Offices</div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <input
+        type="search"
+        id="search-input"
+        class="search-input"
+        placeholder="Search offices by name or location…"
+        aria-label="Search offices"
+      >
+    </div>
+
+    <!-- Loading -->
+    <div id="loading-state" class="loading">
+      <div class="spinner"></div>
+      <span>Loading offices…</span>
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="empty-state hidden">
+      <div class="empty-state__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <h3 class="empty-state__title">No offices yet</h3>
+      <p>Create your first office to get started.</p>
+      <br>
+      <a href="/admin/office/new" class="btn btn--primary">Create Office</a>
+    </div>
+
+    <!-- Offices Table -->
+    <div class="table-container" id="table-container">
+      <table class="data-table" aria-label="Offices list">
+        <thead>
+          <tr>
+            <th>Photo</th>
+            <th>Name & Location</th>
+            <th>Email</th>
+            <th>Photos</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="offices-tbody"></tbody>
+      </table>
+      <div id="pagination" class="pagination"></div>
+    </div>
+
+  </main>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="delete-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal">
+      <h2 class="modal__title">Delete Office?</h2>
+      <p class="modal__body">
+        Are you sure you want to delete <strong id="delete-office-name"></strong>?
+        This will permanently remove the office and all its photos. This action cannot be undone.
+      </p>
+      <div class="modal__actions">
+        <button id="cancel-delete-btn" class="btn btn--secondary">Cancel</button>
+        <button id="confirm-delete-btn" class="btn btn--danger">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>

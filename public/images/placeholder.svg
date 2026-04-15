@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="400" height="250">
+  <rect width="400" height="250" fill="#E8E4D8"/>
+  <rect x="140" y="70" width="120" height="110" rx="8" fill="none" stroke="#A0826D" stroke-width="2"/>
+  <circle cx="175" cy="105" r="12" fill="none" stroke="#A0826D" stroke-width="2"/>
+  <polyline points="140,180 175,145 210,165 250,130 300,180" fill="none" stroke="#A0826D" stroke-width="2"/>
+  <text x="200" y="215" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#8B6F47">No Photo Available</text>
+</svg>
