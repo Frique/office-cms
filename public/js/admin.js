@@ -274,8 +274,8 @@ class OfficeForm {
 
   async loadOffice() {
     try {
-      const data = await apiRequest('GET', `/admin/api/offices`);
-      const office = (data.offices || []).find(o => o.id === this.officeId);
+      const data = await apiRequest('GET', `/admin/api/offices/${this.officeId}`);
+      const office = data.office;
       if (!office) {
         window.location.href = '/admin';
         return;

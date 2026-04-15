@@ -5,6 +5,7 @@ const path = require('path');
 const os = require('os');
 const { requireAuth } = require('../middleware/auth');
 const { uploadPhoto, deletePhoto } = require('../controllers/uploadController');
+const { apiLimiter } = require('../middleware/rateLimit');
 const { ALLOWED_MIME_TYPES } = require('../config/constants');
 
 const upload = multer({
@@ -22,7 +23,7 @@ const upload = multer({
   },
 });
 
-router.post('/:officeId', requireAuth, upload.single('photo'), uploadPhoto);
-router.delete('/:officeId/:photoIndex', requireAuth, deletePhoto);
+router.post('/:officeId', requireAuth, apiLimiter, upload.single('photo'), uploadPhoto);
+router.delete('/:officeId/:photoIndex', requireAuth, apiLimiter, deletePhoto);
 
 module.exports = router;

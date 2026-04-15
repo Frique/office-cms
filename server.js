@@ -9,6 +9,7 @@ const path = require('path');
 
 const { initializeDatabase } = require('./src/db/init');
 const { errorHandler } = require('./src/middleware/errorHandler');
+const { apiLimiter } = require('./src/middleware/rateLimit');
 const officesRouter = require('./src/routes/offices');
 const adminRouter = require('./src/routes/admin');
 const authRouter = require('./src/routes/auth');
@@ -37,11 +38,24 @@ app.use(helmet({
 // Compression
 app.use(compression());
 
-// CORS
-app.use(cors({
-  origin: isProd ? false : true,
-  credentials: true,
-}));
+// CORS - only allow same-origin requests (disable cross-origin for APIs)
+// The app is intended to be served from a single domain
+if (!isProd) {
+  // In development, allow localhost origins only
+  app.use(cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (same-origin, curl, etc.)
+      if (!origin) return callback(null, true);
+      // Allow localhost in development
+      if (/^https?:\/\/localhost(:\d+)?$/.test(origin) ||
+          /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+  }));
+}
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
@@ -55,10 +69,48 @@ app.use(session({
   cookie: {
     httpOnly: true,
     secure: isProd,
-    sameSite: 'lax',
+    sameSite: 'strict',
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   },
 }));
+
+// CSRF protection for state-changing API requests
+// Uses double-submit cookie pattern: check that the Origin/Referer matches the host
+app.use((req, res, next) => {
+  const safeMethods = ['GET', 'HEAD', 'OPTIONS'];
+  if (safeMethods.includes(req.method)) return next();
+
+  // Only enforce for API/auth endpoints
+  const isApiRoute = req.path.startsWith('/auth') ||
+                     req.path.startsWith('/admin/api') ||
+                     req.path.startsWith('/api/');
+  if (!isApiRoute) return next();
+
+  const origin = req.headers.origin;
+  const referer = req.headers.referer;
+  const host = req.headers.host;
+
+  if (!host) return res.status(403).json({ error: 'Forbidden' });
+
+  const allowedOrigin = `${isProd ? 'https' : 'http'}://${host}`;
+
+  if (origin) {
+    if (origin !== allowedOrigin) {
+      return res.status(403).json({ error: 'Forbidden: invalid origin' });
+    }
+  } else if (referer) {
+    try {
+      const refererUrl = new URL(referer);
+      if (refererUrl.origin !== allowedOrigin) {
+        return res.status(403).json({ error: 'Forbidden: invalid referer' });
+      }
+    } catch {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+  }
+  // If neither origin nor referer is present (e.g., same-origin curl in dev), allow it
+  next();
+});
 
 // Static files
 app.use(express.static(path.join(__dirname, 'public'), {
@@ -76,8 +128,8 @@ app.use('/admin', adminRouter);
 app.use('/api/upload', uploadsRouter);
 app.use('/', officesRouter);
 
-// 404 handler
-app.use((req, res) => {
+// 404 handler (rate limited to prevent enumeration)
+app.use(apiLimiter, (req, res) => {
   if (req.xhr || req.headers.accept?.includes('application/json')) {
     return res.status(404).json({ error: 'Not found' });
   }

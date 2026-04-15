@@ -4,12 +4,12 @@ const path = require('path');
 const { listOffices, getOffice } = require('../controllers/officeController');
 const { apiLimiter } = require('../middleware/rateLimit');
 
-// Public HTML pages
-router.get('/', (req, res) => {
+// Public HTML pages (rate limited)
+router.get('/', apiLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '../../views/public/index.html'));
 });
 
-router.get('/office/:id', (req, res) => {
+router.get('/office/:id', apiLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '../../views/public/office.html'));
 });
 

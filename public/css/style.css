@@ -803,6 +803,8 @@ main {
   border: 0;
 }
 
+.hidden { display: none !important; }
+
 .text-center { text-align: center; }
 .text-muted { color: var(--color-text-muted); }
 .fw-bold { font-weight: 700; }

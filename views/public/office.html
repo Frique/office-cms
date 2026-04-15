@@ -150,14 +150,14 @@
     }
 
     function renderOffice(office) {
-      // Meta
-      document.getElementById('page-title').textContent = `${escapeHtml(office.name)} — Office CMS`;
-      document.getElementById('og-title').content = office.name;
+      // Meta — textContent auto-escapes, setAttribute uses escaped values for attributes
+      document.getElementById('page-title').textContent = `${office.name} — Office CMS`;
+      document.getElementById('og-title').setAttribute('content', escapeHtml(office.name));
       if (office.description) {
-        document.getElementById('page-description').content = office.description.slice(0, 160);
+        document.getElementById('page-description').setAttribute('content', escapeHtml(office.description.slice(0, 160)));
       }
 
-      // Content
+      // Content — textContent is XSS-safe (auto-escapes)
       document.getElementById('office-name').textContent = office.name;
 
       if (office.location) {
